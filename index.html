@@ -2,23 +2,29 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>شات P2P</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات نصي P2P</title>
 <style>
-  #chat { border:1px solid #ccc; width:300px; height:300px; overflow:auto; padding:5px; }
-  #msg { width:200px; }
+  body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+  h2 { margin-bottom: 10px; }
+  #chat { border:1px solid #ccc; width:100%; max-width:400px; height:400px; overflow:auto; padding:10px; margin-bottom:10px; }
+  #msg { width:70%; padding:5px; }
+  #send { padding:5px 10px; }
 </style>
 </head>
 <body>
+
 <h2>شات نصي P2P</h2>
 <div id="chat"></div>
 <input id="msg" placeholder="اكتب رسالة">
 <button id="send">إرسال</button>
 
 <script type="module">
+  // استيراد Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
   import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-  // Firebase Config
+  // إعداد Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
     authDomain: "mmmm-78a14.firebaseapp.com",
@@ -30,7 +36,7 @@
     measurementId: "G-XT96SY6067"
   };
 
-  // Initialize Firebase
+  // تهيئة التطبيق
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
@@ -38,25 +44,27 @@
   const msgInput = document.getElementById("msg");
   const sendBtn = document.getElementById("send");
 
-  const room = "room1"; // غرفة واحدة للتجربة
+  const room = "room1"; // الغرفة التجريبية
   const messagesRef = ref(db, "rooms/" + room);
 
   // إرسال رسالة
   sendBtn.onclick = () => {
-    const msg = msgInput.value;
+    const msg = msgInput.value.trim();
     if(msg){
       push(messagesRef, { text: msg });
       msgInput.value = "";
     }
   };
 
-  // استقبال الرسائل
+  // استقبال الرسائل مباشرة
   onChildAdded(messagesRef, snapshot => {
     const data = snapshot.val();
-    chatDiv.innerHTML += `<div>آخر: ${data.text}</div>`;
-    chatDiv.scrollTop = chatDiv.scrollHeight; // تمرير تلقائي للأسفل
+    const msgElement = document.createElement("div");
+    msgElement.textContent = data.text;
+    chatDiv.appendChild(msgElement);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
   });
-
 </script>
+
 </body>
 </html>
