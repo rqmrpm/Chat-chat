@@ -220,3 +220,45 @@ function showAdminAlert(message, id) {
 document.getElementById('settingsBtn').onclick = () => {
     if (confirm('هل تريد تسجيل الخروج؟')) signOut(auth).then(() => window.location.href = 'index.html');
 };
+import { sendMessage } from './utils.js';
+
+let activeChatUid = null;
+
+window.openChat = (uid, name) => {
+    activeChatUid = uid;
+    document.getElementById('chat-with-name').textContent = name;
+    document.getElementById('chat-overlay').style.display = 'flex';
+    loadMessages(uid);
+};
+
+window.closeChat = () => {
+    document.getElementById('chat-overlay').style.display = 'none';
+    activeChatUid = null;
+};
+
+function loadMessages(toUid) {
+    const chatPath = `directChats/${[currentUser.uid, toUid].sort().join('_')}`;
+    const messagesDiv = document.getElementById('chat-messages');
+    onValue(ref(db, chatPath), (snapshot) => {
+        messagesDiv.innerHTML = '';
+        const msgs = snapshot.val();
+        if (msgs) {
+            Object.values(msgs).forEach(m => {
+                const div = document.createElement('div');
+                div.className = `message ${m.sender === currentUser.uid ? 'sent' : 'received'}`;
+                div.textContent = m.text;
+                messagesDiv.appendChild(div);
+            });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    });
+}
+
+document.getElementById('send-chat-btn').onclick = async () => {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (text && activeChatUid) {
+        await sendMessage(currentUser.uid, activeChatUid, text);
+        input.value = '';
+    }
+};

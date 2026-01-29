@@ -11,7 +11,7 @@
     <!-- الهيدر العلوي -->
     <header class="top-header">
         <div class="logo">
-            <i class="fab fa-money-bill-wave"></i>
+            <i class="fab fa-coins"></i>
             <span>Chat Chat</span>
         </div>
         <div id="header-actions">
@@ -21,6 +21,19 @@
     </header>
 
     <!-- محتوى الصفحة -->
+<div id="chat-overlay" class="chat-overlay" style="display:none;"> 
+    <div class="chat-window"> 
+        <div class="chat-header"> 
+            <span id="chat-with-name">الدردشة</span> 
+            <button onclick="closeChat()"><i class="fas fa-times"></i></button> 
+        </div> 
+        <div id="chat-messages" class="chat-messages"></div> 
+        <div class="chat-input-area"> 
+            <input type="text" id="chat-input" placeholder="اكتب رسالة..."> 
+            <button id="send-chat-btn"><i class="fas fa-paper-plane"></i></button> 
+        </div> 
+    </div> 
+</div>
     <main>
         <!-- تبويب جهات الاتصال -->
         <div class="tab-content" id="contacts">
