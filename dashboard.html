@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم | Chat Chat</title>
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<!-- الهيدر العلوي -->
+<header class="top-header">
+  <div class="logo">
+    <img src="assets/logo.png" alt="Logo">
+    <span>Chat Chat</span>
+  </div>
+  <button id="settingsBtn">⚙️</button>
+</header>
+
+<!-- محتوى الصفحة -->
+<main>
+  <div class="tabs">
+    <button class="tab-btn" data-tab="contacts">جهات الاتصال</button>
+    <button class="tab-btn" data-tab="mychats">دردشاتي</button>
+    <button class="tab-btn" data-tab="random">دردشة عشوائية</button>
+  </div>
+
+  <div class="tab-content" id="contacts">قائمة جهات الاتصال تظهر هنا</div>
+  <div class="tab-content" id="mychats">الدردشات الخاصة بك</div>
+  <div class="tab-content" id="random">ابدأ دردشة عشوائية</div>
+</main>
+
+<!-- الهيدر السفلي -->
+<footer class="bottom-footer">
+  <button data-tab="contacts">جهات الاتصال</button>
+  <button data-tab="mychats">دردشاتي</button>
+  <button data-tab="random">عشوائية</button>
+</footer>
+
+<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
