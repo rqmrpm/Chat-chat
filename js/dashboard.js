@@ -35,12 +35,66 @@ auth.onAuthStateChanged(async (user) => {
     if (isAdmin(user)) {
       showAdminButton();
     }
+    
+    // بدء الاستماع لرسائل الإدارة
+    listenForAdminBroadcasts();
   }
-});
+});/ الاستماع لرسائل الإدارة
+function listenForAdminBroadcasts() {
+  const broadcastRef = ref(db, 'adminBroadcasts');
+  // نأخذ آخر رسالة فقط عند الدخول
+  onValue(broadcastRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const lastKey = Object.keys(data).pop();
+      const lastMsg = data[lastKey];
+      
+      // إذا كانت الرسالة جديدة (خلال آخر 24 ساعة) ولم يراها المستخدم بعد
+      const isRecent = (Date.now() - lastMsg.timestamp) < (24 * 60 * 60 * 1000);
+      const seenKey = `admin_msg_seen_${lastKey}`;
+      
+      if (isRecent && !localStorage.getItem(seenKey)) {
+        showAdminAlert(lastMsg.message, lastKey);
+      }
+    }
+  });
+}
+
+// عرض تنبيه من الإدارة
+function showAdminAlert(message, msgId) {
+  const alertDiv = document.createElement('div');
+  alertDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0084FF;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 9999;
+    max-width: 90%;
+    text-align: center;
+    animation: slideDown 0.5s ease;
+  `;
+  
+  alertDiv.innerHTML = `
+    <div style="font-weight: bold; margin-bottom: 5px;">📢 رسالة من الإدارة</div>
+    <div>${message}</div>
+    <button id="closeAdminAlert" style="margin-top: 10px; background: white; color: #0084FF; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">فهمت</button>
+  `;
+  
+  document.body.appendChild(alertDiv);
+  
+  document.getElementById('closeAdminAlert').onclick = () => {
+    localStorage.setItem(`admin_msg_seen_${msgId}`, 'true');
+    alertDiv.remove();
+  };
+}
 
 // عرض معلومات المستخدم
-function displayUserInfo() {
-  const userInfoDiv = document.createElement('div');
+async function displayUserInfo() {const userInfoDiv = document.createElement('div');
   userInfoDiv.className = 'user-info-header';
   userInfoDiv.innerHTML = `
     <div class="user-profile">

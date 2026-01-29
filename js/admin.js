@@ -207,6 +207,33 @@ document.getElementById('resetPointsBtn').onclick = async () => {
   showToast('تم إعادة تعيين النقاط للجميع!', 'success');
 };
 
+// إرسال رسالة جماعية
+document.getElementById('sendBroadcastBtn').onclick = async () => {
+  const msg = document.getElementById('broadcastMsg').value.trim();
+  if (!msg) {
+    showToast('يرجى كتابة رسالة أولاً!', 'error');
+    return;
+  }
+  
+  if (!confirm('هل أنت متأكد من إرسال هذه الرسالة لجميع المستخدمين؟')) return;
+  
+  try {
+    // حفظ الرسالة في مسار خاص بالرسائل الإدارية
+    const broadcastRef = ref(db, 'adminBroadcasts');
+    await push(broadcastRef, {
+      message: msg,
+      timestamp: Date.now(),
+      sender: 'الإدارة'
+    });
+    
+    showToast('تم إرسال الرسالة بنجاح!', 'success');
+    document.getElementById('broadcastMsg').value = '';
+  } catch (e) {
+    showToast('فشل في إرسال الرسالة', 'error');
+    console.error(e);
+  }
+};
+
 // التبديل بين التبويبات
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
