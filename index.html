@@ -3,111 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تسجيل دخول Firebase</title>
-<style>
-  body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  input { margin: 5px 0; padding: 8px; width: 250px; }
-  button { padding: 8px 15px; margin: 5px; }
-  #userInfo { margin-top: 20px; }
-</style>
+<title>تسجيل الدخول | Chat Chat</title>
+<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
-<h2>تسجيل دخول Firebase</h2>
+<div class="container">
+  <div class="card">
+    <h2>مرحبًا بك في Chat Chat</h2>
+    <p>إنشاء حساب أو تسجيل الدخول للمتابعة</p>
 
-<input id="name" placeholder="اسمك">
-<input id="email" type="email" placeholder="البريد الإلكتروني">
-<input id="password" type="password" placeholder="كلمة المرور">
-<button id="signup">إنشاء حساب</button>
-<button id="login">تسجيل الدخول</button>
-<button id="googleSign">تسجيل دخول Google</button>
+    <input id="name" placeholder="اسمك" type="text">
+    <input id="email" placeholder="البريد الإلكتروني" type="email">
+    <input id="password" placeholder="كلمة المرور" type="password">
+    <input id="age" placeholder="العمر" type="number" min="1" max="120">
+    <select id="gender">
+      <option value="" disabled selected>الجنس</option>
+      <option value="male">ذكر</option>
+      <option value="female">أنثى</option>
+      <option value="other">آخر</option>
+    </select>
+    <input id="profilePic" type="file" accept="image/*">
 
-<div id="userInfo"></div>
+    <div class="buttons">
+      <button id="signup">إنشاء حساب</button>
+      <button id="login">تسجيل الدخول</button>
+      <button id="googleSign">تسجيل دخول Google</button>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    <div id="userInfo"></div>
+  </div>
+</div>
 
-  // إعداد Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
-    authDomain: "mmmm-78a14.firebaseapp.com",
-    databaseURL: "https://mmmm-78a14-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "mmmm-78a14",
-    storageBucket: "mmmm-78a14.firebasestorage.app",
-    messagingSenderId: "628960654552",
-    appId: "1:628960654552:web:dd2b9292df41f4cad913ad",
-    measurementId: "G-XT96SY6067"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-
-  const nameInput = document.getElementById('name');
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const signupBtn = document.getElementById('signup');
-  const loginBtn = document.getElementById('login');
-  const googleBtn = document.getElementById('googleSign');
-  const userInfoDiv = document.getElementById('userInfo');
-
-  // إنشاء حساب
-  signupBtn.onclick = () => {
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    const pass = passwordInput.value;
-
-    if(!name || !email || !pass) return alert('املأ كل الحقول');
-
-    createUserWithEmailAndPassword(auth, email, pass)
-      .then(userCredential => {
-        const user = userCredential.user;
-        // حفظ بيانات المستخدم في قاعدة البيانات
-        set(ref(db, 'users/' + user.uid), {
-          name: name,
-          email: user.email,
-          points: 0,
-          cookies: 10
-        });
-        userInfoDiv.textContent = `مرحبًا ${name}, UID: ${user.uid}`;
-      })
-      .catch(err => alert(err.message));
-  };
-
-  // تسجيل دخول
-  loginBtn.onclick = () => {
-    const email = emailInput.value.trim();
-    const pass = passwordInput.value;
-    if(!email || !pass) return alert('املأ كل الحقول');
-
-    signInWithEmailAndPassword(auth, email, pass)
-      .then(userCredential => {
-        const user = userCredential.user;
-        userInfoDiv.textContent = `مرحبًا ${user.email}, UID: ${user.uid}`;
-      })
-      .catch(err => alert(err.message));
-  };
-
-  // تسجيل دخول Google
-  googleBtn.onclick = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(result => {
-        const user = result.user;
-        // حفظ الاسم والبريد في قاعدة البيانات
-        set(ref(db, 'users/' + user.uid), {
-          name: user.displayName || 'Google User',
-          email: user.email,
-          points: 0,
-          cookies: 10
-        });
-        userInfoDiv.textContent = `مرحبًا ${user.displayName || user.email}, UID: ${user.uid}`;
-      })
-      .catch(err => alert(err.message));
-  };
-</script>
-
+<script type="module" src="js/index.js"></script>
 </body>
 </html>
