@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دردشة عشوائية | Chat Chat</title>
+<link rel="stylesheet" href="css/randomchat.css">
+</head>
+<body>
+
+<header class="top-header">
+  <div class="logo">
+    <img src="assets/logo.png" alt="Logo">
+    <span>Chat Chat</span>
+  </div>
+  <button id="settingsBtn">⚙️</button>
+</header>
+
+<main>
+  <div id="chat" class="chat-box"></div>
+  <input id="msg" placeholder="اكتب رسالة..." />
+  <button id="sendBtn">إرسال</button>
+</main>
+
+<footer class="bottom-footer">
+  <button onclick="window.location.href='dashboard.html'">لوحة التحكم</button>
+  <button onclick="window.location.href='contacts.html'">جهات الاتصال</button>
+  <button onclick="window.location.href='mychats.html'">دردشاتي</button>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
+  authDomain: "mmmm-78a14.firebaseapp.com",
+  databaseURL: "https://mmmm-78a14-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mmmm-78a14",
+  storageBucket: "mmmm-78a14.firebasestorage.app",
+  messagingSenderId: "628960654552",
+  appId: "1:628960654552:web:dd2b9292df41f4cad913ad",
+  measurementId: "G-XT96SY6067"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+auth.onAuthStateChanged(user => {
+  if(!user) window.location.href="index.html";
+});
+
+const chatBox = document.getElementById('chat');
+const msgInput = document.getElementById('msg');
+const sendBtn = document.getElementById('sendBtn');
+
+const room = "random"; // غرفة الدردشة العشوائية
+const messagesRef = ref(db, "rooms/" + room);
+
+// إرسال رسالة
+sendBtn.onclick = () => {
+  const msg = msgInput.value.trim();
+  if(msg){
+    push(messagesRef, { text: msg, uid: auth.currentUser.uid });
+    msgInput.value = "";
+  }
+};
+
+// استقبال الرسائل مباشرة
+onChildAdded(messagesRef, snapshot => {
+  const data = snapshot.val();
+  const div = document.createElement('div');
+  div.textContent = `${data.text}`;
+  div.className = data.uid === auth.currentUser.uid ? 'my-msg' : 'other-msg';
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+// زر الإعدادات
+document.getElementById('settingsBtn').onclick = () => {
+  if(confirm("تسجيل الخروج؟")) signOut(auth).then(()=>window.location.href="index.html");
+};
+</script>
+</body>
+</html>
