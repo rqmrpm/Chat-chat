@@ -1,69 +1,96 @@
-/* تصميم عصري زجاجي */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #4a90e2, #9013fe);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+/* css/index.css */
+:root {
+  --messenger-blue: #0084FF;
+  --messenger-bg: #FFFFFF;
+  --messenger-light-bg: #F0F2F5;
+  --messenger-text: #050505;
+  --messenger-secondary-text: #65676B;
+  --messenger-border: #E4E6EB;
+}
+
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--messenger-light-bg);
+  color: var(--messenger-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  direction: rtl;
 }
 
 .container {
   width: 100%;
   max-width: 400px;
+  padding: 20px;
 }
 
 .card {
-  backdrop-filter: blur(15px);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  color: #fff;
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1);
   text-align: center;
 }
 
-.card input, .card select {
+.card h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--messenger-blue);
+  margin-bottom: 8px;
+}
+
+.card p {
+  color: var(--messenger-secondary-text);
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+input, select {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 12px;
-  border: none;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--messenger-border);
+  border-radius: 6px;
+  font-size: 15px;
   outline: none;
-  background: rgba(255,255,255,0.2);
-  color: #fff;
-  font-size: 16px;
 }
 
-.card input::placeholder, .card select {
-  color: #eee;
-}
-
-.card .buttons {
+.buttons {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
-.card button {
+button {
+  width: 100%;
   padding: 12px;
-  border-radius: 12px;
   border: none;
+  border-radius: 6px;
+  font-size: 17px;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: bold;
-  background: rgba(255,255,255,0.3);
-  color: #fff;
-  transition: 0.3s;
 }
 
-.card button:hover {
-  background: rgba(255,255,255,0.5);
+#login {
+  background-color: var(--messenger-blue);
+  color: white;
 }
 
-#userInfo {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #fffb;
+#signup {
+  background-color: #42b72a;
+  color: white;
+}
+
+#googleSign {
+  background-color: white;
+  color: #444;
+  border: 1px solid #ddd;
 }
