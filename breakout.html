@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Chat | تحطيم القوالب 🧱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #F0F2F5; display: flex; flex-direction: column; align-items: center; margin: 0; height: 100vh; overflow: hidden; }
+        .header { width: 100%; padding: 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 15px; }
+        .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #0084FF; }
+        canvas { background: #eee; border: 2px solid #ddd; border-radius: 10px; margin-top: 20px; max-width: 95vw; }
+        .controls { margin-top: 20px; display: flex; gap: 20px; }
+        .ctrl-btn { padding: 15px 40px; background: #0084FF; color: white; border: none; border-radius: 10px; font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-right"></i></button>
+        <h2>تحطيم القوالب 🧱</h2>
+    </div>
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+    <div class="controls">
+        <button class="ctrl-btn" id="leftBtn"><i class="fas fa-chevron-right"></i></button>
+        <button class="ctrl-btn" id="rightBtn"><i class="fas fa-chevron-left"></i></button>
+    </div>
+
+    <script type="module">
+        import { updatePoints } from './js/utils.js';
+        import { auth } from './js/firebase-config.js';
+
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        let ballRadius = 10;
+        let x = canvas.width/2;
+        let y = canvas.height-30;
+        let dx = 2;
+        let dy = -2;
+        let paddleHeight = 10;
+        let paddleWidth = 75;
+        let paddleX = (canvas.width-paddleWidth)/2;
+        let rightPressed = false;
+        let leftPressed = false;
+        let brickRowCount = 3;
+        let brickColumnCount = 5;
+        let brickWidth = 75;
+        let brickHeight = 20;
+        let brickPadding = 10;
+        let brickOffsetTop = 30;
+        let brickOffsetLeft = 30;
+        let score = 0;
+
+        let bricks = [];
+        for(let c=0; c<brickColumnCount; c++) {
+            bricks[c] = [];
+            for(let r=0; r<brickRowCount; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
+        }
+
+        document.getElementById("leftBtn").ontouchstart = () => leftPressed = true;
+        document.getElementById("leftBtn").ontouchend = () => leftPressed = false;
+        document.getElementById("rightBtn").ontouchstart = () => rightPressed = true;
+        document.getElementById("rightBtn").ontouchend = () => rightPressed = false;
+
+        function collisionDetection() {
+            for(let c=0; c<brickColumnCount; c++) {
+                for(let r=0; r<brickRowCount; r++) {
+                    let b = bricks[c][r];
+                    if(b.status == 1) {
+                        if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                            score++;
+                            if(score == brickRowCount*brickColumnCount) {
+                                alert("مبروك! لقد فزت!");
+                                if(auth.currentUser) updatePoints(auth.currentUser.uid, score * 2);
+                                document.location.reload();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+        function drawBricks() {
+            for(let c=0; c<brickColumnCount; c++) {
+                for(let r=0; r<brickRowCount; r++) {
+                    if(bricks[c][r].status == 1) {
+                        let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                        let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = "#0095DD";
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("النقاط: "+score, 8, 20);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawScore();
+            collisionDetection();
+
+            if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) dx = -dx;
+            if(y + dy < ballRadius) dy = -dy;
+            else if(y + dy > canvas.height-ballRadius) {
+                if(x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+                else {
+                    alert("انتهت اللعبة!");
+                    document.location.reload();
+                    return;
+                }
+            }
+
+            if(rightPressed && paddleX < canvas.width-paddleWidth) paddleX += 7;
+            else if(leftPressed && paddleX > 0) paddleX -= 7;
+
+            x += dx;
+            y += dy;
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body>
+</html>

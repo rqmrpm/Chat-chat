@@ -78,3 +78,9 @@ main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
 .admin-alert-card p { color: var(--messenger-secondary-text); margin-bottom: 25px; line-height: 1.5; }
 .admin-alert-card button { background: var(--messenger-blue); color: white; border: none; padding: 10px 30px; border-radius: 25px; font-weight: 700; cursor: pointer; width: 100%; }
 .loading { text-align: center; padding: 40px; color: var(--messenger-secondary-text); }
+
+/* Game Sections */
+.game-section h3 { font-size: 18px; margin-bottom: 12px; color: var(--messenger-text); border-right: 4px solid var(--messenger-blue); padding-right: 10px; }
+.games-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.game-card.arcade { border-color: #2ecc71; }
+.game-card.arcade .game-icon { color: #2ecc71; }
