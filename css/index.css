@@ -1,11 +1,11 @@
-/* css/index.css */
 :root {
   --messenger-blue: #0084FF;
-  --messenger-bg: #FFFFFF;
-  --messenger-light-bg: #F0F2F5;
-  --messenger-text: #050505;
-  --messenger-secondary-text: #65676B;
-  --messenger-border: #E4E6EB;
+  --messenger-bg: #F0F2F5;
+  --card-bg: #FFFFFF;
+  --text-main: #050505;
+  --text-secondary: #65676B;
+  --border-color: #E4E6EB;
+  --success-green: #42b72a;
 }
 
 * {
@@ -16,8 +16,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--messenger-light-bg);
-  color: var(--messenger-text);
+  background-color: var(--messenger-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,70 +26,159 @@ body {
 
 .container {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   padding: 20px;
 }
 
 .card {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1);
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-.card h2 {
+.logo-area {
+  margin-bottom: 25px;
+}
+
+.logo-area i {
+  font-size: 50px;
+  color: var(--messenger-blue);
+  margin-bottom: 10px;
+}
+
+.logo-area h2 {
   font-size: 28px;
   font-weight: 800;
   color: var(--messenger-blue);
-  margin-bottom: 8px;
 }
 
-.card p {
-  color: var(--messenger-secondary-text);
-  margin-bottom: 24px;
+.logo-area p {
+  color: var(--text-secondary);
   font-size: 15px;
 }
 
-input, select {
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-group i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.input-group input, .input-group select {
   width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  border: 1px solid var(--messenger-border);
-  border-radius: 6px;
+  padding: 14px 40px 14px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 15px;
+  background: #F5F6F7;
   outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  border-color: var(--messenger-blue);
+  background: white;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row .input-group {
+  flex: 1;
+}
+
+.file-input {
+  background: #F5F6F7;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.file-input label {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.file-input input {
+  display: none;
 }
 
 .buttons {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 button {
   width: 100%;
   padding: 12px;
   border: none;
-  border-radius: 6px;
-  font-size: 17px;
+  border-radius: 8px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: filter 0.2s;
 }
 
-#login {
+button:hover {
+  filter: brightness(0.9);
+}
+
+.btn-primary {
   background-color: var(--messenger-blue);
   color: white;
 }
 
-#signup {
-  background-color: #42b72a;
+.btn-success {
+  background-color: var(--success-green);
   color: white;
 }
 
-#googleSign {
+.btn-google {
   background-color: white;
   color: #444;
   border: 1px solid #ddd;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 10px 0;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+#userInfo {
+  margin-top: 15px;
+  font-size: 14px;
+  color: var(--messenger-blue);
+  font-weight: 600;
 }

@@ -1,45 +1,85 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة التحكم | Chat Chat</title>
-<link rel="stylesheet" href="css/dashboard.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Chat | الرئيسية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
+    <!-- الهيدر العلوي -->
+    <header class="top-header">
+        <div class="logo">
+            <i class="fab fa-facebook-messenger"></i>
+            <span>Chat Chat</span>
+        </div>
+        <div id="header-actions">
+            <!-- سيتم إضافة معلومات المستخدم وزر الأدمن هنا برمجياً -->
+            <button id="settingsBtn" title="الإعدادات"><i class="fas fa-cog"></i></button>
+        </div>
+    </header>
 
-<!-- الهيدر العلوي -->
-<header class="top-header">
-  <div class="logo">
-    <img src="assets/logo.png" alt="Logo">
-    <span>Chat Chat</span>
-  </div>
-  <button id="settingsBtn">⚙️</button>
-</header>
+    <!-- محتوى الصفحة -->
+    <main>
+        <!-- تبويب جهات الاتصال -->
+        <div class="tab-content" id="contacts">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> جهات الاتصال</h2>
+            </div>
+            <div id="contacts-list"></div>
+        </div>
 
-<!-- محتوى الصفحة -->
-<main>
-  <div class="tabs">
-    <button class="tab-btn" data-tab="contacts">جهات الاتصال</button>
-    <button class="tab-btn" data-tab="mychats">دردشاتي</button>
-    <button class="tab-btn" data-tab="random">دردشة عشوائية</button>
-    <button class="tab-btn" data-tab="games">🎮 الألعاب</button>
-  </div>
+        <!-- تبويب دردشاتي -->
+        <div class="tab-content" id="mychats">
+            <div class="section-header">
+                <h2><i class="fas fa-comment-dots"></i> دردشاتي</h2>
+            </div>
+            <div id="chats-list"></div>
+        </div>
 
-  <div class="tab-content" id="contacts">قائمة جهات الاتصال تظهر هنا</div>
-  <div class="tab-content" id="mychats">الدردشات الخاصة بك</div>
-  <div class="tab-content" id="random">ابدأ دردشة عشوائية</div>
-  <div class="tab-content" id="games">الألعاب المتاحة</div>
-</main>
+        <!-- تبويب دردشة عشوائية -->
+        <div class="tab-content" id="random">
+            <div class="random-chat-hero">
+                <i class="fas fa-dice"></i>
+                <h2>دردشة عشوائية</h2>
+                <p>تواصل مع أشخاص جدد حول العالم فوراً!</p>
+                <div class="cost-info">التكلفة: 5 🍪</div>
+                <button id="startRandomBtn" class="btn-primary">ابدأ الآن</button>
+            </div>
+        </div>
 
-<!-- الهيدر السفلي -->
-<footer class="bottom-footer">
-  <button data-tab="contacts">جهات الاتصال</button>
-  <button data-tab="mychats">دردشاتي</button>
-  <button data-tab="random">عشوائية</button>
-  <button data-tab="games">🎮</button>
-</footer>
+        <!-- تبويب الألعاب -->
+        <div class="tab-content" id="games">
+            <div class="section-header">
+                <h2><i class="fas fa-gamepad"></i> الألعاب</h2>
+            </div>
+            <div id="games-grid" class="games-grid">
+                <!-- سيتم تحميل الألعاب هنا -->
+            </div>
+        </div>
+    </main>
 
-<script type="module" src="js/dashboard.js"></script>
+    <!-- الهيدر السفلي (التبويبات) -->
+    <footer class="bottom-footer">
+        <button class="tab-btn active" data-tab="contacts">
+            <i class="fas fa-address-book"></i>
+            <span>الجهات</span>
+        </button>
+        <button class="tab-btn" data-tab="mychats">
+            <i class="fas fa-comments"></i>
+            <span>دردشاتي</span>
+        </button>
+        <button class="tab-btn" data-tab="random">
+            <i class="fas fa-random"></i>
+            <span>عشوائية</span>
+        </button>
+        <button class="tab-btn" data-tab="games">
+            <i class="fas fa-gamepad"></i>
+            <span>الألعاب</span>
+        </button>
+    </footer>
+
+    <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>

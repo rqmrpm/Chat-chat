@@ -1,124 +1,217 @@
 import { auth, db, isAdmin } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-import { getUserData, isUserBanned } from './utils.js';
+import { ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getUserData, isUserBanned, showToast } from './utils.js';
 
 let currentUser = null;
 let userData = null;
 
+// التحقق من تسجيل الدخول
 auth.onAuthStateChanged(async (user) => {
-  if(!user) {
-    window.location.href = "index.html";
-    return;
-  }
-  currentUser = user;
-  try {
-    const banned = await isUserBanned(user.uid);
-    if (banned) {
-      alert('تم حظر حسابك من قبل الإدارة');
-      await signOut(auth);
-      window.location.href = "index.html";
-      return;
+    if (!user) {
+        window.location.href = "index.html";
+        return;
     }
-    userData = await getUserData(user.uid);
-    if(userData) {
-      displayUserInfo();
-      if (isAdmin(user)) {
-        showAdminButton();
-      }
-      listenForAdminBroadcasts();
+    currentUser = user;
+    try {
+        const banned = await isUserBanned(user.uid);
+        if (banned) {
+            alert('تم حظر حسابك من قبل الإدارة');
+            await signOut(auth);
+            window.location.href = "index.html";
+            return;
+        }
+        
+        // مراقبة بيانات المستخدم بشكل حي
+        const userRef = ref(db, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+            userData = snapshot.val();
+            if (userData) {
+                displayUserInfo();
+                if (isAdmin(user)) {
+                    showAdminButton();
+                }
+            }
+        });
+
+        listenForAdminBroadcasts();
+        loadTabContent('contacts'); // تحميل التبويب الافتراضي
+    } catch (error) {
+        console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error loading data:", error);
-  }
 });
 
-function listenForAdminBroadcasts() {
-  const broadcastRef = ref(db, 'adminBroadcasts');
-  onValue(broadcastRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      const keys = Object.keys(data);
-      const lastKey = keys[keys.length - 1];
-      const lastMsg = data[lastKey];
-      const isRecent = (Date.now() - lastMsg.timestamp) < (24 * 60 * 60 * 1000);
-      const seenKey = \`admin_msg_seen_\${lastKey}\`;
-      if (isRecent && !localStorage.getItem(seenKey)) {
-        showAdminAlert(lastMsg.message, lastKey);
-      }
+// عرض معلومات المستخدم في الهيدر
+function displayUserInfo() {
+    const headerActions = document.getElementById('header-actions');
+    let userInfoDiv = document.getElementById('user-header-info');
+    
+    if (!userInfoDiv) {
+        userInfoDiv = document.createElement('div');
+        userInfoDiv.id = 'user-header-info';
+        userInfoDiv.className = 'user-info-header';
+        headerActions.prepend(userInfoDiv);
     }
-  });
-}
 
-function showAdminAlert(message, msgId) {
-  const alertDiv = document.createElement('div');
-  alertDiv.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0084FF;color:white;padding:15px 25px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.2);z-index:9999;max-width:90%;text-align:center;';
-  alertDiv.innerHTML = \`<div>📢 رسالة من الإدارة</div><div>\${message}</div><button id="closeAdminAlert" style="margin-top:10px;background:white;color:#0084FF;border:none;padding:5px 15px;border-radius:5px;cursor:pointer;font-weight:bold;">فهمت</button>\`;
-  document.body.appendChild(alertDiv);
-  document.getElementById('closeAdminAlert').onclick = () => {
-    localStorage.setItem(\`admin_msg_seen_\${msgId}\`, 'true');
-    alertDiv.remove();
-  };
-}
-
-async function displayUserInfo() {
-  const userInfoDiv = document.createElement('div');
-  userInfoDiv.className = 'user-info-header';
-  userInfoDiv.innerHTML = \`<div class="user-profile">\${userData.profilePic ? \`<img src="\${userData.profilePic}" class="profile-pic-small">\` : \`<div class="profile-pic-placeholder">\${userData.name.charAt(0)}</div>\`}<div class="user-details"><h3>\${userData.name}</h3><div class="user-stats"><span>🍪 \${userData.cookies || 0} كوكيز</span><span>⭐ \${userData.points || 0} نقطة</span></div></div></div>\`;
-  const header = document.querySelector('.top-header');
-  if (header && !document.querySelector('.user-info-header')) {
-    header.appendChild(userInfoDiv);
-  }
+    userInfoDiv.innerHTML = `
+        <div class="user-stats">
+            <span title="كوكيز"><i class="fas fa-cookie-bite"></i> ${userData.cookies || 0}</span>
+            <span title="نقاط"><i class="fas fa-star"></i> ${userData.points || 0}</span>
+        </div>
+        <div class="user-profile-mini">
+            ${userData.profilePic ? 
+                `<img src="${userData.profilePic}" class="avatar-mini">` : 
+                `<div class="avatar-placeholder">${userData.name.charAt(0)}</div>`
+            }
+        </div>
+    `;
 }
 
 function showAdminButton() {
-  const adminBtn = document.createElement('button');
-  adminBtn.id = 'adminBtn';
-  adminBtn.textContent = '👑 لوحة الأدمن';
-  adminBtn.className = 'admin-btn';
-  adminBtn.onclick = () => { window.location.href = 'admin.html'; };
-  const header = document.querySelector('.top-header');
-  if (header && !document.getElementById('adminBtn')) {
-    header.appendChild(adminBtn);
-  }
+    if (document.getElementById('adminBtn')) return;
+    const adminBtn = document.createElement('button');
+    adminBtn.id = 'adminBtn';
+    adminBtn.className = 'admin-btn';
+    adminBtn.innerHTML = '<i class="fas fa-user-shield"></i>';
+    adminBtn.title = 'لوحة الإدارة';
+    adminBtn.onclick = () => window.location.href = 'admin.html';
+    document.getElementById('header-actions').prepend(adminBtn);
 }
 
-const tabBtns = document.querySelectorAll('.tab-btn, .bottom-footer button');
+// التبديل بين التبويبات
+const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
+
 tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = btn.dataset.tab;
-    if (!target) return;
-    tabContents.forEach(tc => tc.style.display = 'none');
-    tabBtns.forEach(b => b.classList.remove('active'));
-    const targetTab = document.getElementById(target);
-    if (targetTab) {
-      targetTab.style.display = 'block';
-      btn.classList.add('active');
-      loadTabContent(target);
-    }
-  });
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        const targetTab = document.getElementById(target);
+        if (targetTab) {
+            targetTab.classList.add('active');
+            loadTabContent(target);
+        }
+    });
 });
 
 function loadTabContent(tabName) {
-  const contentDiv = document.getElementById(tabName);
-  if (!contentDiv) return;
-  switch(tabName) {
-    case 'contacts': contentDiv.innerHTML = '<iframe src="contacts.html" style="width:100%;height:100%;border:none;"></iframe>'; break;
-    case 'mychats': contentDiv.innerHTML = '<iframe src="mychats.html" style="width:100%;height:100%;border:none;"></iframe>'; break;
-    case 'random': contentDiv.innerHTML = '<iframe src="randomchat.html" style="width:100%;height:100%;border:none;"></iframe>'; break;
-    case 'games': loadGamesMenu(); break;
-  }
+    const contentDiv = document.getElementById(tabName);
+    switch(tabName) {
+        case 'contacts': loadContacts(); break;
+        case 'mychats': loadMyChats(); break;
+        case 'games': loadGamesMenu(); break;
+    }
 }
 
 function loadGamesMenu() {
-  const gamesDiv = document.getElementById('games');
-  if (!gamesDiv) return;
-  gamesDiv.innerHTML = '<div class="games-menu"><h2>🎮 الألعاب المتاحة</h2><div class="games-grid"><div class="game-card" onclick="window.location.href=\\'chess.html\\'"><div class="game-icon">♟️</div><h3>شطرنج</h3><p>10 كوكيز</p><button class="play-btn">العب الآن</button></div><div class="game-card" onclick="window.location.href=\\'billiard.html\\'"><div class="game-icon">🎱</div><h3>بلياردو</h3><p>15 كوكيز</p><button class="play-btn">العب الآن</button></div></div></div>';
+    const gamesGrid = document.getElementById('games-grid');
+    const games = [
+        { id: 'chess', name: 'شطرنج', icon: '♟️', cost: 10, file: 'chess.html' },
+        { id: 'billiard', name: 'بلياردو', icon: '🎱', cost: 15, file: 'billiard.html' },
+        { id: 'xo', name: 'X-O', icon: '❌', cost: 5, file: 'xo.html' },
+        { id: 'rps', name: 'حجر ورقة مقص', icon: '✊', cost: 5, file: 'rps.html' }
+    ];
+
+    gamesGrid.innerHTML = games.map(game => `
+        <div class="game-card" onclick="window.location.href='${game.file}'">
+            <div class="game-icon">${game.icon}</div>
+            <h3>${game.name}</h3>
+            <p>${game.cost} 🍪</p>
+            <button class="play-btn">تحدي</button>
+        </div>
+    `).join('');
 }
 
-const defaultTab = document.getElementById('contacts');
-if (defaultTab) {
-  defaultTab.style.display = 'block';
-  loadTabContent('contacts');
+function loadContacts() {
+    const list = document.getElementById('contacts-list');
+    list.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>';
+    
+    onValue(ref(db, 'users'), (snapshot) => {
+        const users = snapshot.val();
+        if (!users) return;
+        
+        list.innerHTML = '';
+        Object.keys(users).forEach(uid => {
+            if (uid === currentUser.uid) return;
+            const user = users[uid];
+            const item = document.createElement('div');
+            item.className = 'contact-item';
+            item.innerHTML = `
+                <div class="contact-info">
+                    ${user.profilePic ? `<img src="${user.profilePic}" class="avatar">` : `<div class="avatar-placeholder">${user.name.charAt(0)}</div>`}
+                    <div class="details">
+                        <h4>${user.name}</h4>
+                        <p>${user.banned ? '🚫 محظور' : '🟢 متصل'}</p>
+                    </div>
+                </div>
+                <div class="contact-actions">
+                    <button onclick="startPrivateChat('${uid}')" title="دردشة"><i class="fas fa-comment"></i></button>
+                    <button onclick="sendChallenge('${uid}')" title="تحدي"><i class="fas fa-swords"></i></button>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    });
+}
+
+// نظام التحديات والرهانات
+window.sendChallenge = async (targetUid) => {
+    const amount = prompt('أدخل مبلغ الرهان (كوكيز):', '5');
+    if (!amount || isNaN(amount) || amount < 0) return;
+    
+    if (userData.cookies < amount) {
+        showToast('رصيدك غير كافي!', 'error');
+        return;
+    }
+
+    const challengeRef = ref(db, `challenges/${targetUid}/${currentUser.uid}`);
+    await set(challengeRef, {
+        fromName: userData.name,
+        amount: parseInt(amount),
+        timestamp: Date.now(),
+        status: 'pending'
+    });
+    showToast('تم إرسال طلب التحدي!', 'success');
+};
+
+// الاستماع لرسائل الإدارة
+function listenForAdminBroadcasts() {
+    const broadcastRef = ref(db, 'adminBroadcasts');
+    onValue(broadcastRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        const lastKey = Object.keys(data).pop();
+        const lastMsg = data[lastKey];
+        if ((Date.now() - lastMsg.timestamp) < 86400000 && !localStorage.getItem(`seen_${lastKey}`)) {
+            showAdminAlert(lastMsg.message, lastKey);
+        }
+    });
+}
+
+function showAdminAlert(message, id) {
+    const div = document.createElement('div');
+    div.className = 'admin-alert-overlay';
+    div.innerHTML = `
+        <div class="admin-alert-card">
+            <i class="fas fa-bullhorn"></i>
+            <h3>إعلان من الإدارة</h3>
+            <p>${message}</p>
+            <button onclick="this.parentElement.parentElement.remove(); localStorage.setItem('seen_${id}', 'true')">فهمت</button>
+        </div>
+    `;
+    document.body.appendChild(div);
+}
+
+document.getElementById('settingsBtn').onclick = () => {
+    const action = confirm('هل تريد تسجيل الخروج؟');
+    if (action) signOut(auth).then(() => window.location.href = 'index.html');
+};
+
+// زر بدء الدردشة العشوائية
+const startRandomBtn = document.getElementById('startRandomBtn');
+if (startRandomBtn) {
+    startRandomBtn.onclick = () => window.location.href = 'randomchat.html';
 }

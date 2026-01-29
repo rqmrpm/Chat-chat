@@ -17,7 +17,7 @@ const userInfoDiv = document.getElementById('userInfo');
 async function uploadProfilePicture(file, uid) {
   if (!file) return '';
   try {
-    const fileRef = storageRef(storage, \`profilePictures/\${uid}/\${file.name}\`);
+    const fileRef = storageRef(storage, `profilePictures/${uid}/${file.name}`);
     await uploadBytes(fileRef, file);
     return await getDownloadURL(fileRef);
   } catch (e) { return ''; }
