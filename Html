@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>شات P2P</title>
+<style>
+  #chat { border:1px solid #ccc; width:300px; height:300px; overflow:auto; padding:5px; }
+  #msg { width:200px; }
+</style>
+</head>
+<body>
+<h2>شات نصي P2P</h2>
+<div id="chat"></div>
+<input id="msg" placeholder="اكتب رسالة">
+<button id="send">إرسال</button>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
+    authDomain: "mmmm-78a14.firebaseapp.com",
+    databaseURL: "https://mmmm-78a14-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "mmmm-78a14",
+    storageBucket: "mmmm-78a14.firebasestorage.app",
+    messagingSenderId: "628960654552",
+    appId: "1:628960654552:web:dd2b9292df41f4cad913ad",
+    measurementId: "G-XT96SY6067"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const chatDiv = document.getElementById("chat");
+  const msgInput = document.getElementById("msg");
+  const sendBtn = document.getElementById("send");
+
+  const room = "room1"; // غرفة واحدة للتجربة
+  const messagesRef = ref(db, "rooms/" + room);
+
+  // إرسال رسالة
+  sendBtn.onclick = () => {
+    const msg = msgInput.value;
+    if(msg){
+      push(messagesRef, { text: msg });
+      msgInput.value = "";
+    }
+  };
+
+  // استقبال الرسائل
+  onChildAdded(messagesRef, snapshot => {
+    const data = snapshot.val();
+    chatDiv.innerHTML += `<div>آخر: ${data.text}</div>`;
+    chatDiv.scrollTop = chatDiv.scrollHeight; // تمرير تلقائي للأسفل
+  });
+
+</script>
+</body>
+</html>
