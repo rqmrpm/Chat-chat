@@ -1,0 +1,316 @@
+/* css/chess.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  min-height: 100vh;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+}
+
+/* الهيدر */
+.game-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.game-header h1 {
+  font-size: 24px;
+  color: #2c3e50;
+}
+
+.back-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.back-btn:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.cost-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* معلومات اللعبة */
+.game-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.player-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 15px;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: white;
+}
+
+.player-name {
+  color: white;
+  font-weight: bold;
+}
+
+.player-color {
+  font-size: 24px;
+}
+
+.vs {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.game-status {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.turn-indicator {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+.turn-indicator.my-turn {
+  background: #2ecc71;
+  color: white;
+}
+
+.turn-indicator.opponent-turn {
+  background: #e74c3c;
+  color: white;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* لوحة الشطرنج */
+.chess-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  gap: 0;
+  border: 4px solid #8b4513;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.chess-square {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chess-square.light {
+  background: #f0d9b5;
+}
+
+.chess-square.dark {
+  background: #b58863;
+}
+
+.chess-square:hover {
+  filter: brightness(1.1);
+}
+
+.chess-square.selected {
+  background: #7fc97f !important;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.chess-piece {
+  font-size: 40px;
+  user-select: none;
+  transition: transform 0.2s;
+}
+
+.chess-square:hover .chess-piece {
+  transform: scale(1.1);
+}
+
+/* الدردشة */
+.game-chat {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.chat-msg-mine, .chat-msg-other {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.chat-msg-mine {
+  background: #667eea;
+  color: white;
+  margin-right: auto;
+}
+
+.chat-msg-other {
+  background: #e0e0e0;
+  color: #333;
+  margin-left: auto;
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.chat-input button {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.chat-input button:hover {
+  background: #5568d3;
+}
+
+.chat-input button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* أزرار التحكم */
+.game-controls {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-resign, .btn-draw {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-resign {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-resign:hover {
+  background: #c0392b;
+}
+
+.btn-draw {
+  background: #f39c12;
+  color: white;
+}
+
+.btn-draw:hover {
+  background: #e67e22;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chess-board {
+    grid-template-columns: repeat(8, 45px);
+    grid-template-rows: repeat(8, 45px);
+  }
+  
+  .chess-square {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .chess-piece {
+    font-size: 30px;
+  }
+  
+  .player-info {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

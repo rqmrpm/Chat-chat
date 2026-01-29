@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شطرنج | Chat Chat</title>
+<link rel="stylesheet" href="css/chess.css">
+</head>
+<body>
+
+<!-- الهيدر -->
+<header class="game-header">
+  <button onclick="window.location.href='dashboard.html'" class="back-btn">← رجوع</button>
+  <h1>♟️ شطرنج</h1>
+  <div class="cost-badge">10 🍪</div>
+</header>
+
+<!-- معلومات اللعبة -->
+<div class="game-info">
+  <div class="player-info">
+    <div id="player1" class="player">
+      <div class="player-avatar"></div>
+      <span class="player-name">أنت</span>
+      <span class="player-color" id="yourColor">⚪</span>
+    </div>
+    <div class="vs">VS</div>
+    <div id="player2" class="player">
+      <div class="player-avatar"></div>
+      <span class="player-name">في انتظار...</span>
+      <span class="player-color">⚫</span>
+    </div>
+  </div>
+  <div id="gameStatus" class="game-status">🔍 جاري البحث عن منافس...</div>
+  <div id="turnIndicator" class="turn-indicator" style="display:none;"></div>
+</div>
+
+<!-- لوحة الشطرنج -->
+<div class="chess-container">
+  <div id="chessBoard" class="chess-board"></div>
+</div>
+
+<!-- منطقة الدردشة -->
+<div class="game-chat">
+  <div id="chatMessages" class="chat-messages"></div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="اكتب رسالة..." disabled>
+    <button id="sendChatBtn" disabled>إرسال</button>
+  </div>
+</div>
+
+<!-- أزرار التحكم -->
+<div class="game-controls">
+  <button id="resignBtn" style="display:none;" class="btn-resign">🏳️ استسلام</button>
+  <button id="drawBtn" style="display:none;" class="btn-draw">🤝 طلب تعادل</button>
+</div>
+
+<script type="module" src="js/chess.js"></script>
+</body>
+</html>

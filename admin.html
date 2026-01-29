@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الأدمن | Chat Chat</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- الهيدر -->
+<header class="admin-header">
+  <div class="logo">
+    <span>👑 لوحة الأدمن</span>
+  </div>
+  <button id="backBtn" onclick="window.location.href='dashboard.html'">← العودة</button>
+</header>
+
+<!-- التبويبات -->
+<div class="admin-tabs">
+  <button class="tab-btn active" data-tab="users">المستخدمين</button>
+  <button class="tab-btn" data-tab="stats">الإحصائيات</button>
+  <button class="tab-btn" data-tab="actions">الإجراءات</button>
+</div>
+
+<!-- محتوى التبويبات -->
+<main class="admin-content">
+  
+  <!-- تبويب المستخدمين -->
+  <div id="users" class="tab-content active">
+    <div class="search-bar">
+      <input type="text" id="searchUsers" placeholder="🔍 ابحث عن مستخدم...">
+    </div>
+    <div id="usersList" class="users-list"></div>
+  </div>
+  
+  <!-- تبويب الإحصائيات -->
+  <div id="stats" class="tab-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>إجمالي المستخدمين</h3>
+        <p id="totalUsers" class="stat-number">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>المستخدمين النشطين</h3>
+        <p id="activeUsers" class="stat-number">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>إجمالي الكوكيز</h3>
+        <p id="totalCookies" class="stat-number">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>إجمالي النقاط</h3>
+        <p id="totalPoints" class="stat-number">0</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- تبويب الإجراءات -->
+  <div id="actions" class="tab-content">
+    <div class="actions-panel">
+      <h3>شحن كوكيز لمستخدم</h3>
+      <input type="text" id="targetUserId" placeholder="UID المستخدم">
+      <input type="number" id="cookiesAmount" placeholder="عدد الكوكيز" min="1">
+      <button id="addCookiesBtn" class="action-btn">➕ شحن كوكيز</button>
+      
+      <hr>
+      
+      <h3>إجراءات سريعة</h3>
+      <button id="addCookiesAllBtn" class="action-btn">🎁 إضافة 10 كوكيز لجميع المستخدمين</button>
+      <button id="resetPointsBtn" class="action-btn warning">🔄 إعادة تعيين النقاط للجميع</button>
+    </div>
+  </div>
+  
+</main>
+
+<!-- نافذة تفاصيل المستخدم -->
+<div id="userModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="userDetails"></div>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
