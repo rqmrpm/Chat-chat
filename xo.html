@@ -3,28 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Chat | X-O</title>
+    <title>Chat Chat | X-O P2P</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root { --messenger-blue: #0084FF; }
         body { font-family: sans-serif; background: #F0F2F5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
         .header { width: 100%; padding: 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 15px; }
-        .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #0084FF; }
-        .game-container { margin-top: 40px; text-align: center; }
-        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 10px; margin-top: 20px; }
-        .cell { width: 100px; height: 100px; background: white; border: 2px solid #0084FF; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; cursor: pointer; }
+        .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--messenger-blue); }
+        .game-container { margin-top: 40px; text-align: center; width: 100%; max-width: 400px; padding: 20px; }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; background: #ddd; padding: 10px; border-radius: 10px; }
+        .cell { aspect-ratio: 1/1; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .cell:hover { background: #f9f9f9; }
         .cell.x { color: #ff4d4d; }
-        .cell.o { color: #0084FF; }
-        .status { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
-        .btn-reset { margin-top: 20px; padding: 10px 25px; background: #0084FF; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .cell.o { color: var(--messenger-blue); }
+        .status { margin-top: 20px; font-size: 18px; font-weight: bold; color: #333; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .bet-info { margin-top: 10px; color: #f39c12; font-weight: bold; }
+        .btn-action { margin-top: 20px; padding: 12px 30px; background: var(--messenger-blue); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; color: white; flex-direction: column; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
     <div class="header">
         <button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-right"></i></button>
-        <h2>لعبة X-O</h2>
+        <h2>تحدي X-O 💸</h2>
     </div>
+
+    <div id="setup-overlay" class="overlay">
+        <h3>انتظار منافس...</h3>
+        <p>سيتم خصم الرهان عند بدء اللعبة</p>
+        <div id="game-id-display" style="margin-top:10px; font-size:12px; opacity:0.7;"></div>
+    </div>
+
     <div class="game-container">
-        <div class="status" id="status">انتظر منافساً...</div>
+        <div class="status" id="status">جاري الاتصال...</div>
+        <div class="bet-info" id="bet-info">الرهان: 0 🍪</div>
         <div class="board" id="board">
             <div class="cell" data-index="0"></div>
             <div class="cell" data-index="1"></div>
@@ -36,19 +48,142 @@
             <div class="cell" data-index="7"></div>
             <div class="cell" data-index="8"></div>
         </div>
-        <button class="btn-reset" id="resetBtn" style="display:none;">إعادة اللعب</button>
     </div>
+
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
-        import { ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-        
-        const board = document.getElementById('board');
+        import { ref, onValue, set, update, onDisconnect, get } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { deductCookies, updateCookies, updatePoints } from './js/utils.js';
+
+        const statusEl = document.getElementById('status');
+        const betEl = document.getElementById('bet-info');
         const cells = document.querySelectorAll('.cell');
-        const status = document.getElementById('status');
-        const resetBtn = document.getElementById('resetBtn');
-        
-        // منطق اللعبة سيتم ربطه بـ WebRTC لاحقاً
-        status.textContent = "اللعبة قيد التطوير P2P";
+        const setupOverlay = document.getElementById('setup-overlay');
+
+        let gameId = new URLSearchParams(window.location.search).get('gameId') || 'global_room';
+        let mySymbol = ''; // X or O
+        let isMyTurn = false;
+        let currentBoard = Array(9).fill('');
+        let gameData = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) return window.location.href = 'index.html';
+            
+            const gameRef = ref(db, `games/xo/${gameId}`);
+            
+            // انضمام للعبة
+            const snapshot = await get(gameRef);
+            if (!snapshot.exists()) {
+                // إنشاء لعبة جديدة
+                mySymbol = 'X';
+                await set(gameRef, {
+                    player1: user.uid,
+                    player1Name: user.displayName || 'لاعب 1',
+                    board: currentBoard,
+                    turn: user.uid,
+                    status: 'waiting',
+                    bet: 5 // رهان افتراضي
+                });
+            } else {
+                const data = snapshot.val();
+                if (data.player1 !== user.uid && !data.player2) {
+                    // انضمام كلاعب ثاني
+                    mySymbol = 'O';
+                    await update(gameRef, {
+                        player2: user.uid,
+                        player2Name: user.displayName || 'لاعب 2',
+                        status: 'playing'
+                    });
+                    // خصم الرهان
+                    await deductCookies(user.uid, data.bet);
+                    await deductCookies(data.player1, data.bet);
+                } else if (data.player1 === user.uid) {
+                    mySymbol = 'X';
+                } else if (data.player2 === user.uid) {
+                    mySymbol = 'O';
+                } else {
+                    alert('اللعبة ممتلئة!');
+                    window.location.href = 'dashboard.html';
+                }
+            }
+
+            // الاستماع لتغيرات اللعبة
+            onValue(gameRef, (snap) => {
+                gameData = snap.val();
+                if (!gameData) return;
+
+                currentBoard = gameData.board;
+                updateUI();
+
+                if (gameData.status === 'playing') {
+                    setupOverlay.style.display = 'none';
+                    isMyTurn = gameData.turn === user.uid;
+                    statusEl.textContent = isMyTurn ? "دورك الآن!" : `انتظر دور ${mySymbol === 'X' ? 'O' : 'X'}`;
+                    betEl.textContent = `الرهان: ${gameData.bet} 🍪`;
+                }
+
+                checkWinner(user.uid);
+            });
+
+            // عند الخروج
+            onDisconnect(gameRef).remove();
+        });
+
+        function updateUI() {
+            cells.forEach((cell, i) => {
+                cell.textContent = currentBoard[i];
+                cell.className = `cell ${currentBoard[i].toLowerCase()}`;
+            });
+        }
+
+        cells.forEach(cell => {
+            cell.onclick = async () => {
+                const index = cell.dataset.index;
+                if (isMyTurn && currentBoard[index] === '' && gameData.status === 'playing') {
+                    currentBoard[index] = mySymbol;
+                    const nextTurn = mySymbol === 'X' ? gameData.player2 : gameData.player1;
+                    await update(ref(db, `games/xo/${gameId}`), {
+                        board: currentBoard,
+                        turn: nextTurn
+                    });
+                }
+            };
+        });
+
+        async function checkWinner(myUid) {
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+
+            for (let p of winPatterns) {
+                if (currentBoard[p[0]] && currentBoard[p[0]] === currentBoard[p[1]] && currentBoard[p[0]] === currentBoard[p[2]]) {
+                    const winnerSymbol = currentBoard[p[0]];
+                    const isIWin = winnerSymbol === mySymbol;
+                    
+                    if (gameData.status !== 'finished') {
+                        await update(ref(db, `games/xo/${gameId}`), { status: 'finished' });
+                        if (isIWin) {
+                            alert('مبروك! لقد فزت بالرهان 💰');
+                            await updateCookies(myUid, gameData.bet * 2);
+                            await updatePoints(myUid, 20);
+                        } else {
+                            alert('للأسف، خسرتم الرهان 💸');
+                        }
+                        window.location.href = 'dashboard.html';
+                    }
+                    return;
+                }
+            }
+
+            if (!currentBoard.includes('') && gameData.status !== 'finished') {
+                alert('تعادل! تم إعادة الرهان');
+                await updateCookies(myUid, gameData.bet);
+                await update(ref(db, `games/xo/${gameId}`), { status: 'finished' });
+                window.location.href = 'dashboard.html';
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,10 +1,8 @@
-// js/firebase-config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
 
-// إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
   authDomain: "mmmm-78a14.firebaseapp.com",
@@ -16,16 +14,15 @@ const firebaseConfig = {
   measurementId: "G-XT96SY6067"
 };
 
-// تهيئة Firebase
 export const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-// بريد الأدمن الأساسي
-export const ADMIN_EMAIL = "mgdwork12119241@gmail.com";
+// تفعيل البقاء قيد تسجيل الدخول
+setPersistence(auth, browserLocalPersistence);
 
-// دالة للتحقق من صلاحيات الأدمن بناءً على البريد الإلكتروني
+export const ADMIN_EMAIL = "mgdwork12119241@gmail.com";
 export function isAdmin(user) {
   return user && user.email === ADMIN_EMAIL;
 }

@@ -215,3 +215,54 @@ const startRandomBtn = document.getElementById('startRandomBtn');
 if (startRandomBtn) {
     startRandomBtn.onclick = () => window.location.href = 'randomchat.html';
 }
+
+// الاستماع لطلبات التحدي الواردة
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        const challengesRef = ref(db, `challenges/${user.uid}`);
+        onValue(challengesRef, (snapshot) => {
+            const challenges = snapshot.val();
+            if (challenges) {
+                Object.keys(challenges).forEach(fromUid => {
+                    const challenge = challenges[fromUid];
+                    if (challenge.status === 'pending') {
+                        showChallengeAlert(fromUid, challenge);
+                    }
+                });
+            }
+        });
+    }
+});
+
+function showChallengeAlert(fromUid, challenge) {
+    const div = document.createElement('div');
+    div.className = 'admin-alert-overlay';
+    div.innerHTML = `
+        <div class="admin-alert-card">
+            <i class="fas fa-swords" style="color:#e74c3c"></i>
+            <h3>تحدي جديد! 💸</h3>
+            <p>المستخدم <b>${challenge.fromName}</b> يتحداك في لعبة X-O</p>
+            <p>الرهان: <b>${challenge.amount} 🍪</b></p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="acceptChallenge('${fromUid}', ${challenge.amount})" style="background:#2ecc71">قبول</button>
+                <button onclick="rejectChallenge('${fromUid}')" style="background:#e74c3c">رفض</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(div);
+}
+
+window.acceptChallenge = async (fromUid, amount) => {
+    if (userData.cookies < amount) {
+        alert('رصيدك غير كافي لقبول التحدي!');
+        return;
+    }
+    const gameId = `game_${fromUid}_${currentUser.uid}`;
+    await set(ref(db, `challenges/${currentUser.uid}/${fromUid}`), { status: 'accepted' });
+    window.location.href = `xo.html?gameId=${gameId}&bet=${amount}`;
+};
+
+window.rejectChallenge = async (fromUid) => {
+    await set(ref(db, `challenges/${currentUser.uid}/${fromUid}`), { status: 'rejected' });
+    document.querySelector('.admin-alert-overlay').remove();
+};
