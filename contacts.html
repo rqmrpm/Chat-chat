@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جهات الاتصال | Chat Chat</title>
+<link rel="stylesheet" href="css/contacts.css">
+</head>
+<body>
+
+<header class="top-header">
+  <div class="logo">
+    <img src="assets/logo.png" alt="Logo">
+    <span>Chat Chat</span>
+  </div>
+  <button id="settingsBtn">⚙️</button>
+</header>
+
+<main>
+  <h2>جهات الاتصال</h2>
+  <div id="contactsList">تحميل جهات الاتصال...</div>
+</main>
+
+<footer class="bottom-footer">
+  <button onclick="window.location.href='dashboard.html'">لوحة التحكم</button>
+  <button onclick="window.location.href='mychats.html'">دردشاتي</button>
+  <button onclick="window.location.href='randomchat.html'">عشوائية</button>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCeM8ll_jksTk5DX7aUjjgMtbsKmWL5c-8",
+  authDomain: "mmmm-78a14.firebaseapp.com",
+  databaseURL: "https://mmmm-78a14-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mmmm-78a14",
+  storageBucket: "mmmm-78a14.firebasestorage.app",
+  messagingSenderId: "628960654552",
+  appId: "1:628960654552:web:dd2b9292df41f4cad913ad",
+  measurementId: "G-XT96SY6067"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// تحقق تسجيل الدخول
+auth.onAuthStateChanged(user => {
+  if(!user) window.location.href="index.html";
+});
+
+// تحميل جهات الاتصال من قاعدة البيانات
+const contactsList = document.getElementById('contactsList');
+const usersRef = ref(db, 'users/');
+
+onValue(usersRef, snapshot => {
+  contactsList.innerHTML = '';
+  snapshot.forEach(child => {
+    const data = child.val();
+    const div = document.createElement('div');
+    div.className = 'contact-item';
+    div.textContent = `${data.name} (${data.email})`;
+    contactsList.appendChild(div);
+  });
+});
+
+// زر الإعدادات
+document.getElementById('settingsBtn').onclick = () => {
+  if(confirm("تسجيل الخروج؟")) signOut(auth).then(()=>window.location.href="index.html");
+};
+</script>
+</body>
+</html>
